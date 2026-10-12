@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../providers/auth-provider';
-import { BookOpen, Compass, Tags, LayoutDashboard, Settings, User, ChevronDown, ChevronRight, LogOut, X, Globe } from 'lucide-react';
+import { BookOpen, Compass, Tags, LayoutDashboard, Settings, User, Users, ChevronDown, ChevronRight, LogOut, X, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { publicApi } from '@/lib/api/public-api';
 import { CategoryResponse } from '@/lib/api/types';
@@ -45,6 +45,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     const navItems = [
         { name: 'Dashboard', href: user ? '/dashboard' : '/login', icon: LayoutDashboard },
         { name: 'All Courses', href: '/courses', icon: Compass },
+        { name: 'Who We Are', href: '/about', icon: Users },
     ];
 
     if (user) {

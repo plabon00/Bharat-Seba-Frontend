@@ -61,6 +61,18 @@ export function Header({ onToggleSidebar, hideToggle = false }: { onToggleSideba
                             className="h-16 w-auto object-contain"
                         />
                     </Link>
+                    
+                    <nav className="hidden md:flex items-center gap-6 ml-4 text-sm font-medium">
+                        <Link href="/courses" className="text-slate-600 hover:text-primary transition-colors">
+                            Courses
+                        </Link>
+                        <Link href="/about" className="text-slate-600 hover:text-primary transition-colors">
+                            Who We Are
+                        </Link>
+                        <Link href="/teacher/courses" className="text-slate-600 hover:text-primary transition-colors">
+                            Course Studio
+                        </Link>
+                    </nav>
                 </div>
                 
                 <div className="flex items-center gap-2 md:gap-4">
