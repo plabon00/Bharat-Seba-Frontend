@@ -37,6 +37,7 @@ export default function NewCoursePage() {
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [uploadedUrl, setUploadedUrl] = useState<string>('');
     const [showManualUrl, setShowManualUrl] = useState(false);
+    const [submitForReview, setSubmitForReview] = useState(true);
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CourseFormValues>({
         resolver: zodResolver(courseSchema),
@@ -311,6 +312,19 @@ export default function NewCoursePage() {
                                     {errors.thumbnailUrl && <p className="text-xs text-destructive">{errors.thumbnailUrl.message}</p>}
                                 </div>
                             )}
+                        </div>
+
+                        <div className="flex items-center gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+                            <input 
+                                type="checkbox" 
+                                id="submitForReview" 
+                                checked={submitForReview} 
+                                onChange={e => setSubmitForReview(e.target.checked)}
+                                className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer"
+                            />
+                            <Label htmlFor="submitForReview" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                                Submit for Admin Review immediately (sends to Admin Panel for approval)
+                            </Label>
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">

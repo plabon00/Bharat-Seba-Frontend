@@ -249,7 +249,7 @@ function EditCourseContent() {
     }
 
     const canEdit = course.status === 'DRAFT' || course.status === 'REJECTED';
-    const canSubmit = canEdit && lessons.length > 0;
+    const canSubmit = canEdit;
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -488,7 +488,7 @@ function EditCourseContent() {
                                 <div className="text-center py-12 border-2 border-dashed rounded-xl bg-slate-50/50">
                                     <BookOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
                                     <h3 className="font-bold text-heading text-sm mb-1">No lessons added yet</h3>
-                                    <p className="text-xs text-muted-foreground mb-4">You need at least 1 lesson before submitting this course for review.</p>
+                                    <p className="text-xs text-muted-foreground mb-4">Add your video or text lessons, or submit the curriculum outline for review.</p>
                                     {canEdit && !isAddingLesson && (
                                         <Button size="sm" className="gap-1.5" onClick={() => setIsAddingLesson(true)}>
                                             <PlusCircle className="w-4 h-4" /> Add First Lesson
