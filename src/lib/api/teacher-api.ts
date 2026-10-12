@@ -2,6 +2,15 @@ import { fetchApi } from './client';
 import { CourseResponse, LessonResponse, PaginatedResponse } from './types';
 
 export const teacherApi = {
+    uploadThumbnail: (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return fetchApi<{ url: string }>('/upload/image', {
+            method: 'POST',
+            body: formData,
+        });
+    },
+
     getMyCourses: (page = 0, size = 20) => fetchApi<PaginatedResponse<CourseResponse>>(`/teacher/courses?page=${page}&size=${size}`),
     
     getCourse: (id: string) => fetchApi<CourseResponse>(`/teacher/courses/${id}`),
