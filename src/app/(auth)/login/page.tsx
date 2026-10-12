@@ -57,11 +57,42 @@ export default function LoginPage() {
         setIsLoading(true);
         setError(null);
         try {
+            // First attempt direct backend authentication (supports seeded admin accounts & backend database users)
+            try {
+                const backendRes = await authApi.login({ email: data.email, password: data.password });
+                if (backendRes && backendRes.token) {
+                    localStorage.setItem('token', backendRes.token);
+                    const userResponse = await authApi.getMe().catch(() => ({
+                        id: backendRes.id,
+                        email: backendRes.email,
+                        fullName: backendRes.fullName,
+                        role: backendRes.role,
+                        accountStatus: 'ACTIVE',
+                        createdAt: new Date().toISOString()
+                    } as any));
+
+                    login(backendRes.token, userResponse);
+
+                    if (backendRes.role === 'ADMIN') router.push('/admin/dashboard');
+                    else router.push('/dashboard');
+                    return;
+                }
+            } catch (backendErr: any) {
+                // If backend credentials failed, try Firebase below
+            }
+
+            // Fallback to Firebase email/password login
             const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
             const idToken = await userCredential.user.getIdToken(true);
             await handleAuthResponse(idToken, userCredential.user.displayName, userCredential.user.photoURL);
         } catch (err: any) {
-            setError(err.message || 'Failed to login. Please check your credentials.');
+            let message = 'Failed to login. Please check your credentials.';
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                message = 'Invalid email or password. Please verify your credentials.';
+            } else if (err.message) {
+                message = err.message;
+            }
+            setError(message);
             setIsLoading(false);
         }
     };
@@ -108,6 +139,12 @@ export default function LoginPage() {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
+                                <Link 
+                                    href="/forgot-password" 
+                                    className="text-xs text-primary hover:underline font-medium"
+                                >
+                                    Forgot password?
+                                </Link>
                             </div>
                             <Input 
                                 id="password" 

@@ -26,5 +26,15 @@ export const authApi = {
     firebaseLogin: (idToken: string, displayName?: string | null, photoUrl?: string | null) => fetchApi<JwtResponse>('/auth/firebase-login', {
         method: 'POST',
         body: JSON.stringify({ idToken, displayName, photoUrl })
+    }),
+
+    forgotPassword: (email: string) => fetchApi<void>('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+    }),
+
+    resetPassword: (token: string, newPassword: string) => fetchApi<void>('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, newPassword })
     })
 };
