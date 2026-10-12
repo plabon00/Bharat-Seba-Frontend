@@ -3,9 +3,9 @@ import { CourseResponse, UserResponse, PaginatedResponse, CategoryResponse } fro
 
 export const adminApi = {
     // Courses
-    getCourses: (page = 0, size = 20) => fetchApi<PaginatedResponse<CourseResponse>>(`/admin/courses?page=${page}&size=${size}`),
+    getCourses: (page = 0, size = 50) => fetchApi<PaginatedResponse<CourseResponse>>(`/admin/courses?page=${page}&size=${size}`),
     
-    getPendingCourses: (page = 0, size = 20) => fetchApi<PaginatedResponse<CourseResponse>>(`/admin/courses/pending?page=${page}&size=${size}`),
+    getPendingCourses: (page = 0, size = 50) => fetchApi<PaginatedResponse<CourseResponse>>(`/admin/courses/pending?page=${page}&size=${size}`),
     
     approveCourse: (id: string) => fetchApi<void>(`/admin/courses/${id}/approve`, {
         method: 'POST'
@@ -20,8 +20,16 @@ export const adminApi = {
         method: 'POST'
     }),
 
+    hideCourse: (id: string) => fetchApi<void>(`/admin/courses/${id}/hide`, {
+        method: 'POST'
+    }),
+
+    deleteCourse: (id: string) => fetchApi<void>(`/admin/courses/${id}`, {
+        method: 'DELETE'
+    }),
+
     // Users
-    getUsers: (page = 0, size = 20) => fetchApi<PaginatedResponse<UserResponse>>(`/admin/users?page=${page}&size=${size}`),
+    getUsers: (page = 0, size = 50) => fetchApi<PaginatedResponse<UserResponse>>(`/admin/users?page=${page}&size=${size}`),
     
     updateUserStatus: (id: string, status: string) => fetchApi<void>(`/admin/users/${id}/status`, {
         method: 'PATCH',
@@ -31,6 +39,10 @@ export const adminApi = {
     updateUserRole: (id: string, role: string) => fetchApi<void>(`/admin/users/${id}/role`, {
         method: 'PATCH',
         body: JSON.stringify({ role })
+    }),
+
+    deleteUser: (id: string) => fetchApi<void>(`/admin/users/${id}`, {
+        method: 'DELETE'
     }),
 
     // Categories
