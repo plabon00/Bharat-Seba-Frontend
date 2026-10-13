@@ -12,6 +12,8 @@ export const authApi = {
         body: JSON.stringify(data)
     }),
 
+    checkEmail: (email: string) => fetchApi<{ exists: boolean; email: string; message: string }>(`/auth/check-email?email=${encodeURIComponent(email)}`),
+
     getMe: () => fetchApi<UserResponse>('/users/me'),
     
     updateProfile: (data: any) => fetchApi<UserResponse>('/users/me', {
