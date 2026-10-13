@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { 
     BookOpen, Users, CheckCircle, AlertTriangle, ShieldAlert, 
     Trash2, Eye, EyeOff, Search, PlusCircle, Lock, ShieldCheck, 
-    RefreshCw, Tag, XCircle, X, Check, ArrowUpRight 
+    RefreshCw, Tag, XCircle, X, Check, ArrowUpRight, Clock, Mail 
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -32,9 +32,11 @@ export default function AdminDashboardPage() {
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Search & Filter state
+    const [pendingSearch, setPendingSearch] = useState('');
     const [courseSearch, setCourseSearch] = useState('');
     const [userSearch, setUserSearch] = useState('');
     const [courseStatusFilter, setCourseStatusFilter] = useState('ALL');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // New Category Modal
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
@@ -42,22 +44,45 @@ export default function AdminDashboardPage() {
 
     const fetchAllData = async () => {
         setIsRefreshing(true);
+        setErrorMessage(null);
         try {
             const [statsData, pendingData, coursesData, usersData, catsData] = await Promise.all([
-                dashboardApi.getAdminDashboard().catch(() => null),
-                adminApi.getPendingCourses(0, 50).catch(() => ({ content: [] })),
-                adminApi.getCourses(0, 50).catch(() => ({ content: [] })),
-                adminApi.getUsers(0, 50).catch(() => ({ content: [] })),
-                publicApi.getCategories().catch(() => [])
+                dashboardApi.getAdminDashboard().catch(err => {
+                    console.error('Failed to load admin stats:', err);
+                    return null;
+                }),
+                adminApi.getPendingCourses(0, 100).catch(err => {
+                    console.error('Failed to load pending courses:', err);
+                    setErrorMessage('Failed to load pending courses: ' + (err.message || 'Server error'));
+                    return { content: [] };
+                }),
+                adminApi.getCourses(0, 100).catch(err => {
+                    console.error('Failed to load all courses:', err);
+                    return { content: [] };
+                }),
+                adminApi.getUsers(0, 100).catch(err => {
+                    console.error('Failed to load users:', err);
+                    return { content: [] };
+                }),
+                publicApi.getCategories().catch(err => {
+                    console.error('Failed to load categories:', err);
+                    return [];
+                })
             ]);
 
+            const pendingList = (pendingData as any)?.content || (Array.isArray(pendingData) ? pendingData : []);
+            const coursesList = (coursesData as any)?.content || (Array.isArray(coursesData) ? coursesData : []);
+            const usersList = (usersData as any)?.content || (Array.isArray(usersData) ? usersData : []);
+            const catsList = Array.isArray(catsData) ? catsData : [];
+
             setStats(statsData);
-            setPendingCourses(pendingData?.content || []);
-            setAllCourses(coursesData?.content || []);
-            setAllUsers(usersData?.content || []);
-            setCategories(catsData || []);
-        } catch (err) {
+            setPendingCourses(pendingList);
+            setAllCourses(coursesList);
+            setAllUsers(usersList);
+            setCategories(catsList);
+        } catch (err: any) {
             console.error('Failed to load admin data:', err);
+            setErrorMessage(err.message || 'Failed to connect to backend server');
         } finally {
             setIsLoading(false);
             setIsRefreshing(false);
@@ -225,11 +250,23 @@ export default function AdminDashboardPage() {
         }
     };
 
+    // Filter pending courses
+    const filteredPendingCourses = pendingCourses.filter(c => {
+        if (!pendingSearch.trim()) return true;
+        const q = pendingSearch.toLowerCase().trim();
+        return (c.title && c.title.toLowerCase().includes(q)) ||
+               (c.courseCode && c.courseCode.toLowerCase().includes(q)) ||
+               (c.teacherName && c.teacherName.toLowerCase().includes(q)) ||
+               (c.teacherEmail && c.teacherEmail.toLowerCase().includes(q)) ||
+               (c.categoryName && c.categoryName.toLowerCase().includes(q));
+    });
+
     // Filter courses
     const filteredCourses = allCourses.filter(c => {
         const matchesSearch = c.title.toLowerCase().includes(courseSearch.toLowerCase()) ||
                               (c.courseCode && c.courseCode.toLowerCase().includes(courseSearch.toLowerCase())) ||
-                              (c.teacherName && c.teacherName.toLowerCase().includes(courseSearch.toLowerCase()));
+                              (c.teacherName && c.teacherName.toLowerCase().includes(courseSearch.toLowerCase())) ||
+                              (c.teacherEmail && c.teacherEmail.toLowerCase().includes(courseSearch.toLowerCase()));
         const matchesStatus = courseStatusFilter === 'ALL' || c.status === courseStatusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -266,6 +303,19 @@ export default function AdminDashboardPage() {
                     </Button>
                 </div>
             </div>
+
+            {/* Error Message Banner */}
+            {errorMessage && (
+                <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+                        <span>{errorMessage}</span>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setErrorMessage(null)} className="h-6 w-6 p-0 text-red-700 hover:bg-red-100">
+                        <X className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
+            )}
 
             {/* Quick Metrics Bar */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -366,80 +416,168 @@ export default function AdminDashboardPage() {
                 </button>
             </div>
 
-            {/* TAB 1: PENDING COURSES FOR APPROVAL */}
+            {/* TAB 1: PENDING COURSES FOR APPROVAL (DEDICATED TABLE) */}
             {activeTab === 'pending' && (
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-lg font-bold text-heading">Courses Awaiting Admin Review</h2>
-                        <span className="text-xs text-muted-foreground">{pendingCourses.length} pending approval</span>
+                    {/* Header & Filter Controls */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 font-bold shrink-0">
+                                <AlertTriangle className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-heading flex items-center gap-2">
+                                    Pending Course Approvals
+                                    <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded-full">
+                                        {pendingCourses.length} awaiting review
+                                    </span>
+                                </h2>
+                                <p className="text-xs text-muted-foreground">
+                                    Review submitted courses from instructors, verify lessons, and publish or reject with feedback.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="relative w-full sm:w-72">
+                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <Input 
+                                placeholder="Search by title, code, instructor or email..." 
+                                value={pendingSearch}
+                                onChange={e => setPendingSearch(e.target.value)}
+                                className="pl-9 h-9 text-xs"
+                            />
+                        </div>
                     </div>
 
-                    {pendingCourses.length > 0 ? (
-                        <div className="grid grid-cols-1 gap-4">
-                            {pendingCourses.map(course => (
-                                <Card key={course.id} className="border border-amber-200/90 bg-white rounded-2xl shadow-xs overflow-hidden">
-                                    <CardContent className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                                        <div className="flex items-start gap-4 min-w-0">
-                                            <div className="w-24 h-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border">
-                                                {course.thumbnailUrl ? (
-                                                    <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                                        <BookOpen className="w-6 h-6" />
+                    {/* Dedicated Pending Approvals Table */}
+                    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                                <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
+                                    <tr>
+                                        <th className="py-3.5 px-4">Course Info</th>
+                                        <th className="py-3.5 px-4">Instructor Account</th>
+                                        <th className="py-3.5 px-4">Category</th>
+                                        <th className="py-3.5 px-4">Difficulty</th>
+                                        <th className="py-3.5 px-4">Submitted At</th>
+                                        <th className="py-3.5 px-4 text-center">Status</th>
+                                        <th className="py-3.5 px-4 text-right">Moderation Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {filteredPendingCourses.length > 0 ? (
+                                        filteredPendingCourses.map(course => (
+                                            <tr key={course.id} className="hover:bg-amber-50/20 transition-colors">
+                                                <td className="py-4 px-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                                                            {course.thumbnailUrl ? (
+                                                                <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                                                    <BookOpen className="w-5 h-5" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="min-w-0 max-w-xs">
+                                                            <div className="font-bold text-heading truncate text-sm" title={course.title}>
+                                                                {course.title}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <span className="font-mono text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-medium">
+                                                                    {course.courseCode}
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-xs font-bold text-heading">{course.title}</span>
-                                                    <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                        PENDING REVIEW
+                                                </td>
+                                                <td className="py-4 px-4">
+                                                    <div className="min-w-0">
+                                                        <div className="font-bold text-slate-800">
+                                                            {course.teacherName || 'Instructor'}
+                                                        </div>
+                                                        {course.teacherEmail && (
+                                                            <div className="text-[11px] text-slate-500 font-mono truncate" title={course.teacherEmail}>
+                                                                {course.teacherEmail}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-4">
+                                                    <span className="bg-slate-100 text-slate-700 font-medium px-2 py-1 rounded-md text-[11px]">
+                                                        {course.categoryName || 'General'}
                                                     </span>
-                                                </div>
-                                                <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{course.description}</p>
-                                                <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
-                                                    <span>By: <strong className="text-slate-700">{course.teacherName || 'Instructor'}</strong></span>
-                                                    <span>Code: <code className="font-mono bg-slate-100 px-1 py-0.2 rounded">{course.courseCode}</code></span>
-                                                    <span>Category: <strong className="text-slate-700">{course.categoryName}</strong></span>
-                                                    <span>Difficulty: <strong className="text-slate-700">{course.difficulty}</strong></span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0">
-                                            <Link href={`/courses/${course.courseCode}`} target="_blank">
-                                                <Button variant="ghost" size="sm" className="text-xs gap-1">
-                                                    <Eye className="w-3.5 h-3.5" /> Preview
-                                                </Button>
-                                            </Link>
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm"
-                                                className="border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-xs gap-1.5"
-                                                onClick={() => handleApproveCourse(course.id, course.title)}
-                                            >
-                                                <CheckCircle className="w-3.5 h-3.5" /> Approve & Publish
-                                            </Button>
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm"
-                                                className="border-red-600 text-red-700 hover:bg-red-50 text-xs gap-1.5"
-                                                onClick={() => handleRejectCourse(course.id, course.title)}
-                                            >
-                                                <XCircle className="w-3.5 h-3.5" /> Reject
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                                </td>
+                                                <td className="py-4 px-4">
+                                                    <span className="text-[11px] font-semibold text-slate-600">
+                                                        {course.difficulty}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 px-4 text-slate-500 text-[11px] whitespace-nowrap">
+                                                    <div className="flex items-center gap-1.5 font-medium">
+                                                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                                        {course.submittedAt ? new Date(course.submittedAt).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        }) : 'Pending'}
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-4 text-center">
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                        UNDER REVIEW
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                                    <Link href={`/courses/${course.courseCode}`} target="_blank">
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            className="text-xs gap-1 border-slate-200 text-slate-600 hover:text-slate-900"
+                                                            title="Preview public course view"
+                                                        >
+                                                            <Eye className="w-3.5 h-3.5" /> Preview
+                                                        </Button>
+                                                    </Link>
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm"
+                                                        className="border-emerald-600 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white text-xs gap-1.5 font-bold transition-colors"
+                                                        onClick={() => handleApproveCourse(course.id, course.title)}
+                                                    >
+                                                        <CheckCircle className="w-3.5 h-3.5" /> Approve & Publish
+                                                    </Button>
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm"
+                                                        className="border-red-300 text-red-600 hover:bg-red-600 hover:text-white text-xs gap-1.5 font-bold transition-colors"
+                                                        onClick={() => handleRejectCourse(course.id, course.title)}
+                                                    >
+                                                        <XCircle className="w-3.5 h-3.5" /> Reject
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={7} className="text-center py-16">
+                                                <CheckCircle className="w-12 h-12 text-emerald-500/50 mx-auto mb-3" />
+                                                <h3 className="text-base font-bold text-heading mb-1">
+                                                    {pendingSearch ? 'No matching pending courses found' : 'Queue is Clear!'}
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {pendingSearch ? 'Try a different search query.' : 'All submitted courses have been reviewed and processed.'}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                    ) : (
-                        <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-xs">
-                            <CheckCircle className="w-12 h-12 text-emerald-500/50 mx-auto mb-3" />
-                            <h3 className="text-base font-bold text-heading mb-1">Queue is Clear!</h3>
-                            <p className="text-xs text-muted-foreground">All submitted courses have been reviewed and processed.</p>
-                        </div>
-                    )}
+                    </div>
                 </div>
             )}
 
@@ -510,7 +648,12 @@ export default function AdminDashboardPage() {
                                                     </div>
                                                 </td>
                                                 <td className="py-3.5 px-4 font-medium text-slate-700">
-                                                    {course.teacherName || 'Instructor'}
+                                                    <div>{course.teacherName || 'Instructor'}</div>
+                                                    {course.teacherEmail && (
+                                                        <div className="text-[11px] text-slate-400 font-mono truncate" title={course.teacherEmail}>
+                                                            {course.teacherEmail}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="py-3.5 px-4 text-slate-600">
                                                     {course.categoryName}

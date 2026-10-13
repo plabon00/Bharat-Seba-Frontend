@@ -42,10 +42,12 @@ export interface CourseResponse {
     description: string;
     thumbnailUrl?: string;
     teacherName: string;
+    teacherEmail?: string;
     categoryName: string;
     categorySlug: string;
     difficulty: CourseDifficulty;
     status: CourseStatus;
+    submittedAt?: string;
     publishedAt?: string;
 }
 
