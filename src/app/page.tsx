@@ -653,9 +653,9 @@ export default function HomePage() {
                                             <PlusCircle className="w-4 h-4" /> Open Course Studio
                                         </button>
                                     </Link>
-                                    <Link href="/about">
+                                    <Link href="/how-to-publish">
                                         <button className="h-11 px-6 rounded-lg border border-white/40 hover:border-white text-white font-semibold text-sm transition-all">
-                                            How Teaching Works
+                                            How to Publish a Course
                                         </button>
                                     </Link>
                                 </div>

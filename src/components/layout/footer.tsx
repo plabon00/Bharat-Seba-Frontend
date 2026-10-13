@@ -40,7 +40,7 @@ export function Footer() {
                             </li>
                             <li>
                                 <Link href="/about" className="hover:text-primary transition-colors flex items-center gap-1.5 font-medium text-slate-800">
-                                    <Users className="w-3.5 h-3.5 text-primary" /> Who We Are (About Us)
+                                    <Users className="w-3.5 h-3.5 text-primary" /> About Us
                                 </Link>
                             </li>
                         </ul>
@@ -48,8 +48,13 @@ export function Footer() {
 
                     {/* Creators / Teach */}
                     <div className="space-y-3">
-                        <h4 className="font-bold text-sm text-heading uppercase tracking-wider">Community Studio</h4>
+                        <h4 className="font-bold text-sm text-heading uppercase tracking-wider">Instructors & Studio</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>
+                                <Link href="/how-to-publish" className="hover:text-primary transition-colors flex items-center gap-1.5 font-medium text-slate-800">
+                                    <Sparkles className="w-3.5 h-3.5 text-primary" /> How to Publish a Course
+                                </Link>
+                            </li>
                             <li>
                                 <Link href="/teacher/courses" className="hover:text-primary transition-colors flex items-center gap-1.5">
                                     <BookOpen className="w-3.5 h-3.5" /> Course Studio
@@ -58,11 +63,6 @@ export function Footer() {
                             <li>
                                 <Link href="/teacher/courses/new" className="hover:text-primary transition-colors flex items-center gap-1.5">
                                     <PlusCircle className="w-3.5 h-3.5" /> Create New Course
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/about#how-it-works" className="hover:text-primary transition-colors">
-                                    How It Works
                                 </Link>
                             </li>
                         </ul>

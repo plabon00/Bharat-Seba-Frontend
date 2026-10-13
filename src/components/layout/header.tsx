@@ -49,8 +49,9 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
     const navLinks = [
         { name: 'Home', href: '/' },
         { name: 'Courses', href: '/courses' },
+        { name: 'How to Publish', href: '/how-to-publish' },
         { name: 'Course Studio', href: '/teacher/courses' },
-        { name: 'Who We Are', href: '/about' },
+        { name: 'About Us', href: '/about' },
     ];
 
     if (user?.role === 'ADMIN') {
