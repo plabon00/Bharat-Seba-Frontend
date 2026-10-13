@@ -16,7 +16,7 @@ import { auth, googleProvider } from '@/lib/firebase/firebase';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 
 const loginSchema = z.object({
-    email: z.string().email('Please enter a valid email address'),
+    email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
     password: z.string().min(1, 'Password is required'),
 });
 
@@ -56,10 +56,11 @@ export default function LoginPage() {
     const onSubmit = async (data: LoginFormValues) => {
         setIsLoading(true);
         setError(null);
+        const normalizedEmail = data.email.trim().toLowerCase();
         try {
             // First attempt direct backend authentication (supports seeded admin accounts & backend database users)
             try {
-                const backendRes = await authApi.login({ email: data.email, password: data.password });
+                const backendRes = await authApi.login({ email: normalizedEmail, password: data.password });
                 if (backendRes && backendRes.token) {
                     localStorage.setItem('token', backendRes.token);
                     const userResponse = await authApi.getMe().catch(() => ({
@@ -82,7 +83,7 @@ export default function LoginPage() {
             }
 
             // Fallback to Firebase email/password login
-            const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+            const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, data.password);
             const idToken = await userCredential.user.getIdToken(true);
             await handleAuthResponse(idToken, userCredential.user.displayName, userCredential.user.photoURL);
         } catch (err: any) {

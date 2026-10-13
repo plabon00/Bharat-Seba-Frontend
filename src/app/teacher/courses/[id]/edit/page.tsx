@@ -78,7 +78,7 @@ function EditCourseContent() {
                 setDetailsForm({
                     title: c.title || '',
                     description: c.description || '',
-                    categoryId: c.categoryId || '',
+                    categoryId: (c as any).categoryId || cats?.find((k: any) => k.name === c.categoryName || k.slug === c.categorySlug)?.id || '',
                     difficulty: c.difficulty || 'ALL_LEVELS',
                     thumbnailUrl: c.thumbnailUrl || ''
                 });
@@ -146,7 +146,7 @@ function EditCourseContent() {
             videoProvider: lesson.videoProvider || 'YOUTUBE',
             videoUrl: lesson.videoUrl || '',
             contentText: lesson.contentText || '',
-            isPreview: !!lesson.preview
+            isPreview: !!lesson.isPreview
         });
     };
 
@@ -463,7 +463,7 @@ function EditCourseContent() {
                                                     <h4 className="font-semibold text-sm text-heading truncate">{lesson.title}</h4>
                                                     <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
                                                         <span>{lesson.lessonType === 'VIDEO' ? 'Video' : 'Text'}</span>
-                                                        {lesson.preview && (
+                                                        {lesson.isPreview && (
                                                             <span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded text-[10px] font-semibold">
                                                                 Free Preview
                                                             </span>

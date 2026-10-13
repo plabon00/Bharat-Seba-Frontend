@@ -17,8 +17,8 @@ import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from '
 import { useAuth } from '@/components/providers/auth-provider';
 
 const registerSchema = z.object({
-    fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-    email: z.string().email('Please enter a valid email address'),
+    fullName: z.string().trim().min(2, 'Full name must be at least 2 characters'),
+    email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -61,16 +61,24 @@ function RegisterForm() {
     const onSubmit = async (data: RegisterFormValues) => {
         setIsLoading(true);
         setError(null);
+        const normalizedEmail = data.email.trim().toLowerCase();
+        const normalizedName = data.fullName.trim();
         try {
             // Register with Firebase
-            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+            const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, data.password);
             // Update profile with name
-            await updateProfile(userCredential.user, { displayName: data.fullName });
+            await updateProfile(userCredential.user, { displayName: normalizedName });
             
             const idToken = await userCredential.user.getIdToken(true);
-            await handleAuthResponse(idToken, data.fullName, userCredential.user.photoURL);
+            await handleAuthResponse(idToken, normalizedName, userCredential.user.photoURL);
         } catch (err: any) {
-            setError(err.message || 'Failed to register. Please try again.');
+            let message = 'Failed to register. Please try again.';
+            if (err.code === 'auth/email-already-in-use') {
+                message = 'An account with this email already exists. Please sign in instead.';
+            } else if (err.message) {
+                message = err.message;
+            }
+            setError(message);
             setIsLoading(false);
         }
     };

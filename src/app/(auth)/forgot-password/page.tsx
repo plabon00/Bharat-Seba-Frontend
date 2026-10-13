@@ -15,7 +15,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { ArrowLeft, CheckCircle2, KeyRound, Mail, RefreshCw } from 'lucide-react';
 
 const forgotPasswordSchema = z.object({
-    email: z.string().email('Please enter a valid email address'),
+    email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
 });
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
@@ -33,10 +33,11 @@ export default function ForgotPasswordPage() {
     const onSubmit = async (data: ForgotPasswordFormValues) => {
         setIsLoading(true);
         setError(null);
+        const normalizedEmail = data.email.trim().toLowerCase();
         try {
             // 1. Trigger Firebase Password Reset Email if applicable
             try {
-                await sendPasswordResetEmail(auth, data.email);
+                await sendPasswordResetEmail(auth, normalizedEmail);
             } catch (fbErr: any) {
                 // If account is not in Firebase (e.g. backend-only user), we still notify backend
                 console.warn('Firebase reset note:', fbErr.message);
@@ -44,12 +45,12 @@ export default function ForgotPasswordPage() {
 
             // 2. Notify Backend of forgot password request
             try {
-                await authApi.forgotPassword(data.email);
+                await authApi.forgotPassword(normalizedEmail);
             } catch (beErr: any) {
                 console.warn('Backend reset note:', beErr.message);
             }
 
-            setSubmittedEmail(data.email);
+            setSubmittedEmail(normalizedEmail);
             setIsSubmitted(true);
         } catch (err: any) {
             setError(err.message || 'Failed to send password reset email. Please try again.');
