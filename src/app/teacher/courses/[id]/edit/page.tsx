@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-    CheckCircle, AlertCircle, Edit, PlusCircle, Trash2, Video, FileText, 
+    CheckCircle, AlertCircle, AlertTriangle, Edit, PlusCircle, Trash2, Video, FileText, 
     BookOpen, X, Loader2, ArrowLeft, Upload, ImageIcon, Eye, ExternalLink 
 } from 'lucide-react';
 import { Suspense } from 'react';
@@ -248,7 +248,7 @@ function EditCourseContent() {
         );
     }
 
-    const canEdit = course.status === 'DRAFT' || course.status === 'REJECTED';
+    const canEdit = course.status === 'DRAFT' || course.status === 'REJECTED' || course.status === 'CHANGES_REQUESTED';
     const canSubmit = canEdit;
 
     return (
@@ -264,10 +264,11 @@ function EditCourseContent() {
                         <span className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${
                             course.status === 'PUBLISHED' ? 'bg-emerald-600 text-white' : 
                             course.status === 'PENDING_REVIEW' ? 'bg-amber-500 text-white' :
+                            course.status === 'CHANGES_REQUESTED' ? 'bg-amber-600 text-white font-bold' :
                             course.status === 'REJECTED' ? 'bg-red-600 text-white' :
                             'bg-slate-700 text-white'
                         }`}>
-                            {course.status}
+                            {course.status === 'CHANGES_REQUESTED' ? 'CHANGES REQUESTED' : course.status}
                         </span>
                     </h1>
                 </div>
@@ -303,7 +304,7 @@ function EditCourseContent() {
                                 </>
                             ) : (
                                 <>
-                                    <CheckCircle className="w-4 h-4" /> Submit for Review
+                                    <CheckCircle className="w-4 h-4" /> {course.status === 'CHANGES_REQUESTED' ? 'Re-Submit for Review' : 'Submit for Review'}
                                 </>
                             )}
                         </Button>
@@ -311,12 +312,43 @@ function EditCourseContent() {
                 </div>
             </div>
 
+            {/* CHANGES REQUESTED Notification Banner */}
+            {course.status === 'CHANGES_REQUESTED' && (
+                <div className="bg-amber-50 border-2 border-amber-300 text-amber-900 p-5 rounded-2xl mb-6 shadow-xs flex items-start gap-3.5">
+                    <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+                    <div className="space-y-2 flex-1">
+                        <div className="flex items-center justify-between">
+                            <h4 className="font-bold text-sm text-amber-900 flex items-center gap-2">
+                                Admin Requested Edits Before Approval
+                                <span className="text-[11px] font-semibold bg-amber-200/80 text-amber-900 px-2.5 py-0.5 rounded-full">
+                                    Action Required
+                                </span>
+                            </h4>
+                        </div>
+                        <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                            The administrator has reviewed this course and requested the following changes:
+                        </p>
+                        <div className="bg-white/95 border border-amber-200 p-3.5 rounded-xl text-xs text-slate-800 font-mono whitespace-pre-wrap shadow-2xs">
+                            {course.rejectionReason || 'Please review your course details and lessons, apply the necessary updates, and re-submit for review.'}
+                        </div>
+                        <p className="text-[11px] text-amber-700 font-medium">
+                            💡 You can edit course information and curriculum lessons below. After making the necessary updates, click <strong>"Re-Submit for Review"</strong> above to send the course back to the admin.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Notification Banners */}
             {course.status === 'REJECTED' && (
                 <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-500" />
-                    <div>
+                    <div className="space-y-1 flex-1">
                         <h4 className="font-semibold text-sm">Course Needs Revision</h4>
+                        {course.rejectionReason && (
+                            <p className="text-xs font-mono bg-white/70 p-2 rounded border border-red-100 text-slate-800">
+                                {course.rejectionReason}
+                            </p>
+                        )}
                         <p className="text-xs mt-0.5">Please review your curriculum, adjust lessons or details, and re-submit for review.</p>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { fetchApi } from './client';
-import { CourseResponse, UserResponse, PaginatedResponse, CategoryResponse } from './types';
+import { CourseResponse, UserResponse, PaginatedResponse, CategoryResponse, AdminCoursePreviewResponse } from './types';
 
 export const adminApi = {
     // Courses
@@ -7,11 +7,18 @@ export const adminApi = {
     
     getPendingCourses: (page = 0, size = 50) => fetchApi<PaginatedResponse<CourseResponse>>(`/admin/courses/pending?page=${page}&size=${size}`),
     
+    getCoursePreview: (id: string) => fetchApi<AdminCoursePreviewResponse>(`/admin/courses/${id}/preview`),
+
     approveCourse: (id: string) => fetchApi<void>(`/admin/courses/${id}/approve`, {
         method: 'POST'
     }),
     
     rejectCourse: (id: string, reason: string) => fetchApi<void>(`/admin/courses/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason })
+    }),
+
+    requestChanges: (id: string, reason: string) => fetchApi<void>(`/admin/courses/${id}/request-changes`, {
         method: 'POST',
         body: JSON.stringify({ reason })
     }),

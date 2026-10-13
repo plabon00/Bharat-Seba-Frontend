@@ -1,6 +1,6 @@
 export type UserRole = 'USER' | 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED';
-export type CourseStatus = 'DRAFT' | 'PENDING_REVIEW' | 'REJECTED' | 'PUBLISHED' | 'ARCHIVED';
+export type CourseStatus = 'DRAFT' | 'PENDING_REVIEW' | 'CHANGES_REQUESTED' | 'REJECTED' | 'PUBLISHED' | 'ARCHIVED';
 export type CourseDifficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'ALL_LEVELS';
 export type LessonType = 'VIDEO' | 'TEXT';
 export type VideoProvider = 'YOUTUBE' | 'GOOGLE_DRIVE';
@@ -47,8 +47,14 @@ export interface CourseResponse {
     categorySlug: string;
     difficulty: CourseDifficulty;
     status: CourseStatus;
+    rejectionReason?: string;
     submittedAt?: string;
     publishedAt?: string;
+}
+
+export interface AdminCoursePreviewResponse extends CourseResponse {
+    createdAt?: string;
+    lessons: LessonResponse[];
 }
 
 export interface LessonResponse {

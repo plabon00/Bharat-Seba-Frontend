@@ -6,7 +6,7 @@ import { teacherApi } from '@/lib/api/teacher-api';
 import { CourseResponse } from '@/lib/api/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, PlusCircle, Edit, Eye, LogIn } from 'lucide-react';
+import { BookOpen, PlusCircle, Edit, Eye, LogIn, AlertTriangle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MyCoursesPage() {
@@ -66,6 +66,8 @@ export default function MyCoursesPage() {
                 return 'bg-emerald-600 text-white';
             case 'PENDING_REVIEW':
                 return 'bg-amber-500 text-white';
+            case 'CHANGES_REQUESTED':
+                return 'bg-amber-600 text-white font-bold animate-pulse';
             case 'REJECTED':
                 return 'bg-red-600 text-white';
             default:
@@ -106,7 +108,7 @@ export default function MyCoursesPage() {
                                 )}
                                 <div className="absolute top-3 right-3">
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${getStatusBadgeClass(course.status)}`}>
-                                        {course.status}
+                                        {course.status === 'CHANGES_REQUESTED' ? 'CHANGES REQUESTED' : course.status}
                                     </span>
                                 </div>
                             </div>
@@ -120,9 +122,36 @@ export default function MyCoursesPage() {
                                     </span>
                                 </div>
                                 <h3 className="font-bold text-lg text-heading mb-2 line-clamp-2">{course.title}</h3>
-                                <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                                     {course.description}
                                 </p>
+
+                                {/* Admin Requested Edits Banner */}
+                                {course.status === 'CHANGES_REQUESTED' && (
+                                    <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                                        <div className="font-bold flex items-center gap-1.5 text-amber-800 mb-1">
+                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                            Admin Requested Edits:
+                                        </div>
+                                        <p className="text-slate-700 font-mono text-[11px] line-clamp-3 bg-white/70 p-1.5 rounded border border-amber-100">
+                                            {course.rejectionReason || 'Please review your lessons and course details and make the requested changes.'}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Admin Rejection Reason Banner */}
+                                {course.status === 'REJECTED' && course.rejectionReason && (
+                                    <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900">
+                                        <div className="font-bold flex items-center gap-1.5 text-red-800 mb-1">
+                                            <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                                            Rejection Reason:
+                                        </div>
+                                        <p className="text-slate-700 font-mono text-[11px] line-clamp-3 bg-white/70 p-1.5 rounded border border-red-100">
+                                            {course.rejectionReason}
+                                        </p>
+                                    </div>
+                                )}
+
                                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
                                     <span className="text-xs text-muted-foreground font-mono">{course.courseCode}</span>
                                     <div className="flex gap-2">
@@ -134,8 +163,13 @@ export default function MyCoursesPage() {
                                             </Link>
                                         )}
                                         <Link href={`/teacher/courses/${course.id}/edit`}>
-                                            <Button variant="secondary" size="sm" className="gap-2">
-                                                <Edit className="w-4 h-4" /> Manage
+                                            <Button 
+                                                variant={course.status === 'CHANGES_REQUESTED' ? 'default' : 'secondary'} 
+                                                size="sm" 
+                                                className={course.status === 'CHANGES_REQUESTED' ? 'bg-amber-600 hover:bg-amber-700 text-white gap-2' : 'gap-2'}
+                                            >
+                                                <Edit className="w-4 h-4" /> 
+                                                {course.status === 'CHANGES_REQUESTED' ? 'Revise & Fix' : 'Manage'}
                                             </Button>
                                         </Link>
                                     </div>
