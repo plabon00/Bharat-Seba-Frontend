@@ -58,26 +58,26 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
     }
 
     return (
-        <header className="sticky top-0 z-40 w-full border-b bg-white/95 backdrop-blur-md shadow-xs">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <header className="sticky top-0 z-40 w-full h-16 bg-white border-b border-[#E0DDD6] shadow-2xs">
+            <div className="container mx-auto px-4 max-w-[1200px] h-full flex items-center justify-between">
                 {/* Left: Mobile Menu Trigger + Brand Logo + Desktop Nav */}
                 <div className="flex items-center gap-3 md:gap-6">
                     {/* Mobile Menu Button */}
                     <button 
                         type="button"
                         onClick={onToggleSidebar} 
-                        className="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
+                        className="lg:hidden p-2 rounded-lg text-[#002D72] hover:bg-[#F4F1EC] transition-colors"
                         aria-label="Open navigation menu"
                     >
                         <Menu className="w-5 h-5" />
                     </button>
 
                     {/* Logo */}
-                    <Link href="/" className="flex items-center shrink-0">
+                    <Link href="/" className="flex items-center gap-2 shrink-0">
                         <img 
                             src="/Bharat Seva.png" 
                             alt="Bharat Seva" 
-                            className="h-12 sm:h-14 w-auto object-contain"
+                            className="h-11 sm:h-12 w-auto object-contain"
                         />
                     </Link>
 
@@ -90,16 +90,16 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                                    className={`text-[14px] font-semibold transition-all flex items-center gap-1.5 h-16 relative ${
                                         isActive 
-                                            ? 'text-primary font-bold' 
-                                            : 'text-slate-600 hover:text-slate-900'
+                                            ? 'text-[#002D72] border-b-2 border-[#F9A825]' 
+                                            : 'text-[#002D72]/80 hover:text-[#002D72]'
                                     }`}
                                 >
-                                    {isAdmin && <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />}
+                                    {isAdmin && <ShieldAlert className="w-3.5 h-3.5 text-[#F9A825]" />}
                                     {link.name}
                                     {isAdmin && (
-                                        <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-full uppercase">
+                                        <span className="text-[10px] bg-[#F9A825]/20 text-[#002D72] font-bold px-1.5 py-0.2 rounded-full uppercase">
                                             Admin
                                         </span>
                                     )}
@@ -112,13 +112,13 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                 {/* Right: Language Selector + Auth Controls */}
                 <div className="flex items-center gap-2 sm:gap-3">
                     {/* Language Selector */}
-                    <div className="relative flex items-center bg-slate-50 border border-slate-200/80 rounded-lg px-2 py-1 hover:bg-slate-100 transition-colors">
-                        <Globe className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                    <div className="relative flex items-center bg-[#F4F1EC] border border-[#E0DDD6] rounded-[10px] px-2.5 py-1 hover:bg-[#EAE6DE] transition-colors">
+                        <Globe className="w-3.5 h-3.5 text-[#002D72] shrink-0" />
                         <select 
                             value={language} 
                             onChange={handleLanguageChange}
-                            className="bg-transparent border-none text-xs font-semibold text-slate-700 focus:ring-0 outline-none cursor-pointer pl-1 pr-5 py-0.5 appearance-none"
-                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em' }}
+                            className="bg-transparent border-none text-xs font-semibold text-[#002D72] focus:ring-0 outline-none cursor-pointer pl-1 pr-4 py-0.5 appearance-none"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23002D72' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em' }}
                         >
                             <option value="en">Eng</option>
                             <option value="hi">हिंदी</option>
@@ -130,11 +130,17 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                         <div className="w-24 h-8" />
                     ) : !isLoading && !user ? (
                         <div className="flex items-center gap-2">
-                            <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm", className: "text-xs font-semibold" })}>
+                            <Link 
+                                href="/login" 
+                                className="h-[44px] px-4 rounded-[10px] border-2 border-[#002D72] text-[#002D72] font-bold text-xs flex items-center justify-center hover:bg-[#002D72]/5 transition-all"
+                            >
                                 Sign In
                             </Link>
-                            <Link href="/register" className={buttonVariants({ size: "sm", className: "text-xs font-semibold" })}>
-                                Sign Up
+                            <Link 
+                                href="/register" 
+                                className="h-[44px] px-4 rounded-[10px] bg-[#F9A825] text-[#002D72] font-bold text-xs flex items-center justify-center shadow-xs hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            >
+                                Register Free
                             </Link>
                         </div>
                     ) : null}
@@ -151,23 +157,26 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                             <button
                                 type="button"
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="flex items-center gap-2 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+                                className="flex items-center gap-2 p-1 rounded-[10px] hover:bg-[#F4F1EC] transition-colors"
                                 aria-label="User account menu"
                             >
-                                <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                                <div className="w-10 h-10 rounded-full bg-[#002D72]/10 border border-[#002D72]/20 flex items-center justify-center text-[#002D72] font-bold text-sm">
                                     {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                                 </div>
+                                <span className="hidden sm:inline-block text-[12px] font-bold uppercase tracking-[0.1em] text-[#002D72] max-w-[120px] truncate">
+                                    {user.fullName?.split(' ')[0] || 'CITIZEN'}
+                                </span>
                             </button>
 
                             {/* Dropdown User Menu */}
                             {isMenuOpen && (
-                                <div className="absolute right-0 top-11 w-56 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-50 text-xs">
-                                    <div className="px-4 py-2 border-b border-slate-100">
-                                        <p className="font-bold text-slate-800 truncate">{user.fullName}</p>
-                                        <p className="text-slate-500 text-[11px] truncate">{user.email}</p>
+                                <div className="absolute right-0 top-13 w-56 bg-white border border-[#E0DDD6] rounded-[16px] shadow-lg py-2 z-50 text-xs">
+                                    <div className="px-4 py-2 border-b border-[#E0DDD6]">
+                                        <p className="font-bold text-[#002D72] truncate">{user.fullName}</p>
+                                        <p className="text-[#666666] text-[11px] truncate">{user.email}</p>
                                         <div className="mt-1">
-                                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                                user.role === 'ADMIN' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                                            <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                                                user.role === 'ADMIN' ? 'bg-[#F9A825]/20 text-[#002D72]' : 'bg-[#002D72]/10 text-[#002D72]'
                                             }`}>
                                                 {user.role}
                                             </span>
