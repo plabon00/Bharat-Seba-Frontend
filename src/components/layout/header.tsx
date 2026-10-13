@@ -58,15 +58,15 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
     }
 
     return (
-        <header className="sticky top-0 z-40 w-full h-16 bg-white border-b border-[#E0DDD6] shadow-2xs">
-            <div className="container mx-auto px-4 max-w-[1200px] h-full flex items-center justify-between">
+        <header className="sticky top-0 z-40 w-full h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+            <div className="container mx-auto px-4 max-w-[1240px] h-full flex items-center justify-between">
                 {/* Left: Mobile Menu Trigger + Brand Logo + Desktop Nav */}
                 <div className="flex items-center gap-3 md:gap-6">
                     {/* Mobile Menu Button */}
                     <button 
                         type="button"
                         onClick={onToggleSidebar} 
-                        className="lg:hidden p-2 rounded-lg text-[#002D72] hover:bg-[#F4F1EC] transition-colors"
+                        className="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
                         aria-label="Open navigation menu"
                     >
                         <Menu className="w-5 h-5" />
@@ -77,7 +77,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                         <img 
                             src="/Bharat Seva.png" 
                             alt="Bharat Seva" 
-                            className="h-11 sm:h-12 w-auto object-contain"
+                            className="h-10 sm:h-11 w-auto object-contain"
                         />
                     </Link>
 
@@ -92,14 +92,14 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                                     href={link.href}
                                     className={`text-[14px] font-semibold transition-all flex items-center gap-1.5 h-16 relative ${
                                         isActive 
-                                            ? 'text-[#002D72] border-b-2 border-[#F9A825]' 
-                                            : 'text-[#002D72]/80 hover:text-[#002D72]'
+                                            ? 'text-[#0056D2] border-b-2 border-[#0056D2]' 
+                                            : 'text-slate-600 hover:text-[#0056D2]'
                                     }`}
                                 >
-                                    {isAdmin && <ShieldAlert className="w-3.5 h-3.5 text-[#F9A825]" />}
+                                    {isAdmin && <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />}
                                     {link.name}
                                     {isAdmin && (
-                                        <span className="text-[10px] bg-[#F9A825]/20 text-[#002D72] font-bold px-1.5 py-0.2 rounded-full uppercase">
+                                        <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full uppercase">
                                             Admin
                                         </span>
                                     )}
@@ -112,13 +112,13 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                 {/* Right: Language Selector + Auth Controls */}
                 <div className="flex items-center gap-2 sm:gap-3">
                     {/* Language Selector */}
-                    <div className="relative flex items-center bg-[#F4F1EC] border border-[#E0DDD6] rounded-[10px] px-2.5 py-1 hover:bg-[#EAE6DE] transition-colors">
-                        <Globe className="w-3.5 h-3.5 text-[#002D72] shrink-0" />
+                    <div className="relative flex items-center bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-200/70 transition-colors">
+                        <Globe className="w-3.5 h-3.5 text-slate-600 shrink-0" />
                         <select 
                             value={language} 
                             onChange={handleLanguageChange}
-                            className="bg-transparent border-none text-xs font-semibold text-[#002D72] focus:ring-0 outline-none cursor-pointer pl-1 pr-4 py-0.5 appearance-none"
-                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23002D72' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em' }}
+                            className="bg-transparent border-none text-xs font-semibold text-slate-700 focus:ring-0 outline-none cursor-pointer pl-1 pr-4 py-0 appearance-none"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em' }}
                         >
                             <option value="en">Eng</option>
                             <option value="hi">हिंदी</option>
@@ -132,15 +132,15 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                         <div className="flex items-center gap-2">
                             <Link 
                                 href="/login" 
-                                className="h-[44px] px-4 rounded-[10px] border-2 border-[#002D72] text-[#002D72] font-bold text-xs flex items-center justify-center hover:bg-[#002D72]/5 transition-all"
+                                className="h-10 px-4 rounded-lg font-semibold text-sm text-slate-700 hover:text-[#0056D2] hover:bg-slate-100 transition-all flex items-center justify-center"
                             >
-                                Sign In
+                                Log In
                             </Link>
                             <Link 
                                 href="/register" 
-                                className="h-[44px] px-4 rounded-[10px] bg-[#F9A825] text-[#002D72] font-bold text-xs flex items-center justify-center shadow-xs hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                className="h-10 px-4 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-semibold text-sm flex items-center justify-center shadow-sm hover:shadow transition-all"
                             >
-                                Register Free
+                                Join for Free
                             </Link>
                         </div>
                     ) : null}
